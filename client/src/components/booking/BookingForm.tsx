@@ -9,6 +9,7 @@ import {
   type BookingFormType
 } from './zod.booking';
 import { useCreateBookingMutation } from '@/services/booking.service';
+import { useEffect } from 'react';
 
 const BookingForm = () => {
   const [createBooking, { isLoading }] = useCreateBookingMutation();
@@ -18,8 +19,15 @@ const BookingForm = () => {
     defaultValues: bookingInitialValues
   });
 
-  const { watch, reset } = methods;
+  const { watch, reset, setValue } = methods;
   const bookingType = watch('bookingType');
+
+  // Reset timeSlot when bookingType changes to fullday
+  useEffect(() => {
+    if (bookingType === 'fullday') {
+      setValue('timeSlot', '');
+    }
+  }, [bookingType, setValue]);
 
   const onSubmit = async (data: BookingFormType) => {
     try {
@@ -98,14 +106,14 @@ const BookingForm = () => {
                 <NativeSelect
                   name="bookingType"
                   label="Booking Type"
+                  props={{
+                    withAsterisk: true
+                  }}
                   data={[
                     { value: 'fullday', label: 'Full Day' },
                     { value: 'halfday', label: 'Half Day' },
                     { value: 'custom', label: 'Custom' }
                   ]}
-                  props={{
-                    withAsterisk: true
-                  }}
                 />
               </Grid.Col>
 
@@ -114,7 +122,11 @@ const BookingForm = () => {
                   <NativeSelect
                     name="timeSlot"
                     label="Time Slot"
+                    props={{
+                      withAsterisk: true
+                    }}
                     data={[
+                      { value: '', label: 'Select a time slot', disabled: true },
                       {
                         value: 'first_half',
                         label: 'First Half ( 9AM to 2PM )'
@@ -124,9 +136,6 @@ const BookingForm = () => {
                         label: 'Second Half ( 3PM to 7PM )'
                       }
                     ]}
-                    props={{
-                      withAsterisk: true
-                    }}
                   />
                 </Grid.Col>
               )}
